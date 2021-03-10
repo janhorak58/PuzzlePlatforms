@@ -23,7 +23,7 @@ protected:
 
 private:
 	UPROPERTY(EditAnywhere)
-	float Velocity = 100.f;
+	float Velocity = 20.f;
 
 	FVector StartLocation;
 
@@ -32,7 +32,9 @@ private:
 	FVector EndLocation;
 
 	UPROPERTY(EditAnywhere)
-	FVector DeltaLocation = FVector(300, 0, 0);
+	FVector DeltaLocation = FVector(800, 0, 0);
+
+	bool bIsServer;
 
 
 	
