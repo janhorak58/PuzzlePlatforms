@@ -29,10 +29,12 @@ private:
 
 	FVector CurrentLocation;
 
+	UPROPERTY(EditAnywhere, Meta = (MakeEditWidget = true))
 	FVector EndLocation;
 
-	UPROPERTY(EditAnywhere)
-	FVector DeltaLocation = FVector(800, 0, 0);
+	FVector GlobalEndLocation;
+
+	FVector TargetVector;
 
 	bool bIsServer;
 

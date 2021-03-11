@@ -9,9 +9,10 @@ void AMovingPlatform::Tick(float DeltaSeconds)
     Super::Tick(DeltaSeconds);
 
 
-    if (!CurrentLocation.Equals(EndLocation, 10.f) && bIsServer)
+    if (!CurrentLocation.Equals(GlobalEndLocation, 10.f) && bIsServer)
     {
-        CurrentLocation.X += Velocity * DeltaSeconds;
+
+        CurrentLocation += TargetVector * DeltaSeconds * Velocity;
         SetActorLocation(CurrentLocation);
 
     }
@@ -24,8 +25,8 @@ void AMovingPlatform::BeginPlay()
     StartLocation = GetActorLocation();
 
 	CurrentLocation = StartLocation;
-
-    EndLocation = StartLocation + DeltaLocation;
+    GlobalEndLocation = GetTransform().TransformPosition(EndLocation);
+    TargetVector = (GlobalEndLocation- StartLocation).GetSafeNormal();
 
     bIsServer = HasAuthority();
 
