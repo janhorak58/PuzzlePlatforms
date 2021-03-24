@@ -1,45 +1,40 @@
 // Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "MovingPlatform.h"
-
-
-void AMovingPlatform::Tick(float DeltaSeconds) 
+AMovingPlatform::AMovingPlatform()
 {
-    Super::Tick(DeltaSeconds);
+	PrimaryActorTick.bCanEverTick = true;
+	SetMobility(EComponentMobility::Movable);
+}
+void AMovingPlatform::BeginPlay()
+{
+	Super::BeginPlay();
+	if (HasAuthority()) {
+		SetReplicates(true);
+		SetReplicateMovement(true);
+	}
 
-
-    if (!CurrentLocation.Equals(GlobalEndLocation, 10.f) && bIsServer)
-    {
-
-        CurrentLocation += TargetVector * DeltaSeconds * Velocity;
-        SetActorLocation(CurrentLocation);
-
-    }
+	GlobalStartLocation = GetActorLocation();
+	GlobalTargetLocation = GetTransform().TransformPosition(TargetLocation);
 }
 
-
-void AMovingPlatform::BeginPlay() 
+void AMovingPlatform::Tick(float DeltaTime)
 {
-    Super::BeginPlay();
-    StartLocation = GetActorLocation();
+	Super::Tick(DeltaTime);
+	if (HasAuthority())
+	{
+		FVector Location = GetActorLocation();
+		float JourneyLength = (GlobalTargetLocation - GlobalStartLocation).Size();
+		float JourneyTravelled = (Location - GlobalStartLocation).Size();
 
-	CurrentLocation = StartLocation;
-    GlobalEndLocation = GetTransform().TransformPosition(EndLocation);
-    TargetVector = (GlobalEndLocation- StartLocation).GetSafeNormal();
+		if (JourneyTravelled >= JourneyLength) 
+		{
+			FVector Swap = GlobalStartLocation;
+			GlobalStartLocation = GlobalTargetLocation;
+			GlobalTargetLocation = Swap;
+		}
 
-    bIsServer = HasAuthority();
-
-    if (bIsServer)
-    {
-        SetReplicates(true);
-        SetReplicateMovement(true);
-    }
-   
-}
-
-AMovingPlatform::AMovingPlatform() 
-{
-    PrimaryActorTick.bCanEverTick = true;
-    SetMobility(EComponentMobility::Movable);
+		FVector Direction = (GlobalTargetLocation - GlobalStartLocation).GetSafeNormal();
+		Location += Speed * DeltaTime * Direction;
+		SetActorLocation(Location);
+	}
 }
